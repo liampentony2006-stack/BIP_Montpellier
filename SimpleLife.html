@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>SimpleLife — Care Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E2A26;
+    --ink-soft:#4C5A55;
+    --bg:#F3F6F0;
+    --panel:#FFFFFF;
+    --line:#DCE3D8;
+    --brand:#03A767;
+    --brand-dark:#087E4E;
+    --brand-light:#E1F5EA;
+    --critical:#B4432F;
+    --critical-bg:#F7E5E1;
+    --important:#C98A2E;
+    --important-bg:#F7EBD8;
+    --flexible:#4472A8;
+    --flexible-bg:#E3EAF3;
+    --brand-navy:#00306D;
+    --brand-green-start:#03A767;
+    --brand-green-end:#03A767;
+    --radius:14px;
+    --shadow: 0 1px 0 rgba(30,42,38,0.06);
+    --font-display: 'Baloo 2', 'Inter', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-elder: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+  .hidden{display:none !important;}
+  :focus-visible{outline:3px solid var(--brand-dark); outline-offset:2px;}
+
+  /* ---------- Device switcher (demo affordance) ---------- */
+  .switcher-bar{
+    max-width:760px;margin:0 auto;padding:10px 16px 0;
+    display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+  }
+  .switcher{
+    display:inline-flex;background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:3px;gap:2px;
+  }
+  .switcher button{
+    border:none;background:transparent;padding:8px 16px;border-radius:999px;
+    font-size:13.5px;font-weight:600;color:var(--ink-soft);
+  }
+  .switcher button.active{background:var(--brand);color:#fff;}
+  .switcher-note{
+    text-align:center;font-size:11.5px;color:var(--ink-soft);
+    max-width:760px;margin:4px auto 0;padding:0 16px;
+  }
+
+  /* ================= FAMILY VIEW ================= */
+  .family-wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px;}
+  .family-header{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+    margin-bottom:18px;
+  }
+  .brand-mark{display:flex;align-items:center;gap:10px;}
+  .bell-badge{
+    position:absolute;top:-6px;right:-6px;background:var(--critical);color:#fff;
+    font-size:10.5px;font-weight:700;border-radius:999px;min-width:18px;height:18px;
+    display:flex;align-items:center;justify-content:center;padding:0 4px;
+  }
+  .back-btn{
+    background:transparent;border:none;color:var(--ink-soft);font-size:14px;font-weight:600;
+    padding:6px 0;margin-bottom:4px;
+  }
+
+  .family-screen{}
+
+  .home-badge-row{display:flex;justify-content:flex-end;margin-bottom:8px;}
+  .home-badge{width:111px;height:111px;flex-shrink:0;}
+
+  .nav-pill-list{display:flex;flex-direction:column;gap:22px;margin:18px 0 32px;}
+  .nav-pill{
+    position:relative;width:100%;border:none;border-radius:999px;padding:28px 26px;
+    font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:.3px;
+    text-transform:uppercase;color:#fff;text-align:left;
+  }
+  .nav-pill.green{background:var(--brand);}
+  .nav-pill.navy{background:var(--brand-navy);}
+  .nav-pill .bell-badge{right:26px;top:50%;transform:translateY(-50%);}
+  .nav-pill.locked{cursor:not-allowed;}
+  .nav-pill.green.locked{background:#9EB3AC;}
+  .nav-pill.navy.locked{background:#6B7280;}
+  .nav-pill.locked .t-text-label{opacity:.75;}
+  .nav-pill .lock-icon{float:right;font-size:15px;opacity:.85;}
+
+  .legal-upload-box{
+    border:2px dashed var(--line);border-radius:var(--radius);padding:22px 16px;
+    text-align:center;margin-bottom:20px;
+  }
+  .legal-upload-box.unlocked{border-style:solid;}
+  .legal-file-input{display:none;}
+  .legal-hint{font-size:12.5px;color:var(--ink-soft);margin:10px 0 0;line-height:1.4;}
+  .legal-doc-row .t-icon{width:34px;height:34px;}
+  .gif-upload-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;}
+
+  .home-footer-logo{display:flex;justify-content:center;margin-top:36px;}
+  .screen-footer-logo{display:flex;justify-content:center;margin-top:32px;}
+
+  .screen-top-row{display:flex;justify-content:flex-end;margin-bottom:10px;}
+  .fab-add{
+    width:52px;height:52px;border-radius:18px;background:var(--brand-navy);color:#fff;
+    border:none;font-size:28px;font-weight:400;line-height:1;display:flex;
+    align-items:center;justify-content:center;padding:0 0 3px;
+  }
+
+  .date-pill{
+    display:inline-block;padding:13px 24px;border-radius:999px;color:#fff;
+    font-family:var(--font-display);font-weight:700;text-transform:uppercase;
+    font-size:16px;letter-spacing:.3px;margin:4px 0 22px;
+  }
+  .date-pill.green{background:var(--brand);}
+  .date-pill.navy{background:var(--brand-navy);}
+
+  .task-row-list{display:flex;flex-direction:column;gap:22px;}
+  .task-row{display:flex;align-items:flex-start;gap:14px;}
+  .task-row .t-icon{flex-shrink:0;width:38px;height:38px;}
+  .task-row .t-icon-btn{background:none;border:none;padding:0;flex-shrink:0;}
+  .task-row .t-body{flex:1;padding-top:3px;}
+  .task-row .t-text{
+    font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--brand-navy);
+    line-height:1.3;
+  }
+  .task-row.done .t-text{color:var(--brand);}
+  .task-row .t-time{font-weight:700;margin-right:4px;}
+  .task-row .t-caption{font-size:12px;color:var(--ink-soft);margin-top:3px;font-family:var(--font-body);}
+  .task-row .t-actions{display:flex;gap:6px;margin-top:6px;}
+
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+  .btn{
+    border:1px solid var(--line);background:var(--panel);border-radius:10px;
+    padding:10px 16px;font-size:14px;font-weight:600;color:var(--ink);
+  }
+  .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .btn.primary:hover{background:var(--brand-dark);}
+  .btn.danger{background:var(--critical);color:#fff;border-color:var(--critical);}
+  .btn.danger:hover{background:#8F3423;}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--ink-soft);}
+  .btn.small{padding:6px 10px;font-size:12.5px;border-radius:8px;}
+  .btn.danger-text{color:var(--critical);}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px;margin-bottom:14px;box-shadow:var(--shadow);
+  }
+  .panel h2{font-family:var(--font-display);font-size:16px;margin:0 0 4px;font-weight:600;}
+  .panel .sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
+
+  .empty-note{font-size:13px;color:var(--ink-soft);padding:10px 0;}
+
+  /* Form panel */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form-field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+  .form-field.full{grid-column:1 / -1;}
+  .form-field label{font-size:12.5px;font-weight:600;color:var(--ink-soft);}
+  .form-field input, .form-field select{
+    padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;color:var(--ink);
+  }
+  .priority-help{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .form-error{font-size:12.5px;color:var(--critical);margin-top:4px;}
+  .day-picker{display:flex;gap:6px;}
+  .day-chip{
+    flex:1;text-align:center;padding:8px 0;border:1px solid var(--line);border-radius:8px;
+    font-size:12px;font-weight:700;background:#fff;color:var(--ink-soft);
+  }
+  .day-chip.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+
+  /* ================= BRAND LOGO ================= */
+  .brand-logo{display:inline-flex;align-items:center;font-family:var(--font-display);font-weight:800;line-height:1;white-space:nowrap;}
+  .brand-logo .word-simple{color:var(--brand-navy);}
+  .brand-logo .word-life{
+    background:linear-gradient(120deg,var(--brand-green-start),var(--brand-green-end));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .brand-logo .check-badge{width:0.42em;height:0.42em;margin-left:0.15em;flex-shrink:0;}
+  .brand-logo.lg{font-size:clamp(34px,7vw,56px);}
+  .brand-logo.sm{font-size:19px;}
+
+  /* ================= ELDERLY VIEW ================= */
+  .elder-wrap{
+    max-width:640px;margin:0 auto;padding:10px 18px 70px;
+    font-family:var(--font-elder);
+    color:#17211E;
+    min-height:calc(100vh - 60px);
+    display:flex;flex-direction:column;
+  }
+  .elder-idle{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+  }
+
+  /* ================= ALARM OVERLAY ================= */
+  .alarm-overlay{
+    position:fixed;inset:0;z-index:50;background:#fff;
+    display:flex;flex-direction:column;padding:26px 24px;
+    font-family:var(--font-elder);
+  }
+  .alarm-overlay-logo{align-self:flex-end;}
+  .alarm-body{flex:1;display:flex;align-items:center;justify-content:center;}
+  .alarm-layout{
+    display:flex;gap:36px;align-items:stretch;width:100%;max-width:640px;
+  }
+  @media (max-width:600px){ .alarm-layout{flex-direction:column;align-items:stretch;} }
+
+  .activity-card{
+    flex:1;min-height:260px;border:4px solid var(--brand-navy);border-radius:28px;
+    background:#fff;padding:24px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+  }
+  .activity-card .activity-name{
+    font-family:var(--font-elder);font-weight:800;font-size:26px;color:var(--brand-navy);
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+  .activity-card .activity-gif{
+    max-width:80%;max-height:140px;object-fit:contain;border-radius:16px;margin-top:16px;display:none;
+  }
+
+  .alarm-actions{display:flex;flex-direction:column;justify-content:center;gap:16px;min-width:200px;}
+  .action-pill{
+    width:100%;box-sizing:border-box;border:none;border-radius:999px;padding:20px 24px;
+    font-size:19px;font-weight:800;
+    font-family:var(--font-elder);color:#fff;text-align:center;line-height:1.2;
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+  .action-pill.confirm{background:linear-gradient(120deg,var(--brand-green-start),var(--brand-green-end));}
+  .action-pill.snooze{background:var(--brand-navy);}
+  .alarm-note{font-size:13px;color:var(--ink-soft);text-align:center;}
+  .help-link{
+    background:none;border:none;color:var(--ink-soft);font-size:14px;text-decoration:underline;
+    margin-top:4px;align-self:center;font-family:var(--font-elder);
+  }
+
+  .confirm-visual{flex:1;display:flex;align-items:center;justify-content:center;min-width:200px;}
+  .confirm-badge{
+    width:130px;height:130px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,var(--brand-green-start),var(--brand-green-end));
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- Toasts ---------- */
+  .toast-stack{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);}
+  .toast{
+    background:#1E2A26;color:#fff;padding:12px 16px;border-radius:12px;font-size:13.5px;
+    box-shadow:0 8px 24px rgba(0,0,0,.2); animation:toastIn .25s ease-out;
+  }
+  .toast.urgent{background:var(--critical);}
+  @keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- Modal backdrop ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,28,25,.4);z-index:40;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  @media (min-width:600px){ .modal-backdrop{align-items:center;} }
+  .modal-sheet{
+    background:#fff;border-radius:18px 18px 0 0;max-width:520px;width:100%;
+    max-height:88vh;overflow-y:auto;padding:20px;
+  }
+  @media (min-width:600px){ .modal-sheet{border-radius:18px;} }
+
+  .loading-splash{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="brandGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#25A968"/>
+      <stop offset="100%" stop-color="#12684A"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div id="loadingSplash" class="loading-splash">
+  <span class="brand-logo lg">
+    <span class="word-simple">Simple</span><span class="word-life">Life</span>
+    <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+      <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+</div>
+
+<div id="app" class="hidden">
+
+  <div class="switcher-bar">
+    <div class="switcher">
+      <button id="btnFamilyView" class="active" onclick="setView('family')">Family view</button>
+      <button id="btnElderlyView" onclick="setView('elderly')">Loved one's view</button>
+    </div>
+  </div>
+  <p class="switcher-note">This preview shows both experiences in one place — in real use, each person has this on their own device, kept in sync.</p>
+
+  <!-- ================= FAMILY VIEW ================= -->
+  <div id="familyView" class="family-wrap view">
+    <div class="family-header">
+      <button id="familyBackBtn" class="back-btn hidden" onclick="goFamilyHome()">Back</button>
+    </div>
+
+    <!-- HOME -->
+    <div id="familyHomeScreen" class="family-screen">
+      <div class="home-badge-row">
+        <svg class="home-badge" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+          <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-pill-list">
+        <button class="nav-pill green" id="navPillUpcoming" onclick="goFamilyScreen('upcoming')">Upcoming tasks</button>
+        <button class="nav-pill navy" id="navPillExisting" onclick="goFamilyScreen('existing')">Existing tasks</button>
+        <button class="nav-pill green" id="navPillAddRemove" onclick="goFamilyScreen('addRemove')">Add / remove task</button>
+        <button class="nav-pill navy" id="navPillNotifications" onclick="goFamilyScreen('notifications')">
+          Notification<span id="bellBadgeHome" class="bell-badge hidden">0</span>
+        </button>
+        <button class="nav-pill green" id="navPillLegal" onclick="goFamilyScreen('legal')">Legal documents</button>
+      </div>
+      <div class="home-footer-logo">
+        <span class="brand-logo sm">
+          <span class="word-simple">Simple</span><span class="word-life">Life</span>
+          <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+            <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- UPCOMING TASKS -->
+    <div id="familyUpcomingScreen" class="family-screen hidden">
+      <div class="date-pill navy" id="upcomingDatePill">—</div>
+      <div id="upcomingList" class="task-row-list"></div>
+      <div class="screen-footer-logo">
+        <span class="brand-logo sm">
+          <span class="word-simple">Simple</span><span class="word-life">Life</span>
+          <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+            <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- EXISTING TASKS -->
+    <div id="familyExistingScreen" class="family-screen hidden">
+      <div class="date-pill navy" id="existingDatePill">—</div>
+      <div id="existingList" class="task-row-list"></div>
+      <div class="screen-footer-logo">
+        <span class="brand-logo sm">
+          <span class="word-simple">Simple</span><span class="word-life">Life</span>
+          <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+            <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- ADD / REMOVE TASK -->
+    <div id="familyAddRemoveScreen" class="family-screen hidden">
+      <div class="screen-top-row">
+        <button class="fab-add" onclick="openForm()" aria-label="Add a new task">+</button>
+      </div>
+      <div class="date-pill navy" id="addRemoveDatePill">—</div>
+      <div id="removeList" class="task-row-list"></div>
+      <div class="screen-footer-logo">
+        <span class="brand-logo sm">
+          <span class="word-simple">Simple</span><span class="word-life">Life</span>
+          <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+            <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="familyNotifScreen" class="family-screen hidden">
+      <div class="date-pill green" id="notifDatePill">—</div>
+      <div id="notifList" class="task-row-list"></div>
+      <div class="form-actions">
+        <button class="btn small" onclick="markAllNotifsSeen()">Mark all as read</button>
+      </div>
+      <div class="screen-footer-logo">
+        <span class="brand-logo sm">
+          <span class="word-simple">Simple</span><span class="word-life">Life</span>
+          <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+            <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- LEGAL DOCUMENTS -->
+    <div id="familyLegalScreen" class="family-screen hidden">
+      <div class="date-pill green" id="legalDatePill">—</div>
+      <div class="legal-upload-box" id="legalUploadBox">
+        <input type="file" id="legalFileInput" class="legal-file-input" onchange="handleLegalFileChange(event)" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+        <button class="btn primary" onclick="document.getElementById('legalFileInput').click()">Upload a document</button>
+        <p class="legal-hint" id="legalHint">Upload a legal document (like power of attorney or an advance directive) to unlock the rest of the app.</p>
+      </div>
+      <div id="legalDocList" class="task-row-list"></div>
+      <div class="screen-footer-logo">
+        <span class="brand-logo sm">
+          <span class="word-simple">Simple</span><span class="word-life">Life</span>
+          <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+            <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ELDERLY VIEW ================= -->
+  <div id="elderlyView" class="elder-wrap view hidden">
+    <div class="elder-idle">
+      <span class="brand-logo lg">
+        <span class="word-simple">Simple</span><span class="word-life">Life</span>
+        <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+          <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+  </div>
+
+</div>
+
+<div id="alarmOverlay" class="alarm-overlay hidden">
+  <span class="brand-logo sm alarm-overlay-logo">
+    <span class="word-simple">Simple</span><span class="word-life">Life</span>
+    <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="11" fill="url(#brandGreenGrad)"/>
+      <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+  <div class="alarm-body">
+    <div id="alarmModeContent" class="alarm-layout hidden">
+      <div class="activity-card">
+        <div class="activity-name" id="alarmTitle">—</div>
+        <img id="alarmGif" class="activity-gif" alt="" onerror="this.style.display='none';">
+      </div>
+      <div class="alarm-actions">
+        <button class="action-pill confirm" onclick="handleAlarmDone()">Finished</button>
+        <div id="alarmSnoozeBtnWrap"></div>
+        <button class="help-link" onclick="handleAlarmHelp()">I need help — let family know</button>
+      </div>
+    </div>
+    <div id="confirmModeContent" class="alarm-layout hidden">
+      <div class="activity-card">
+        <div class="activity-name" id="confirmTitle">—</div>
+      </div>
+      <div class="confirm-visual">
+        <div class="confirm-badge">
+          <svg viewBox="0 0 24 24" width="58" height="58" aria-hidden="true">
+            <path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add / edit activity modal -->
+<div id="formModal" class="modal-backdrop hidden">
+  <div class="modal-sheet">
+    <h2 style="font-family:var(--font-display);margin:0 0 4px;font-size:18px;" id="formTitle">Add an activity</h2>
+    <p class="sub" style="margin-bottom:16px;">Set what it is, when, and how important it is.</p>
+    <div class="form-field full">
+      <label for="fName">Activity name</label>
+      <input id="fName" type="text" placeholder="e.g. Morning medicine">
+      <div id="fNameError" class="form-error hidden">Please give this activity a name.</div>
+    </div>
+    <div class="form-field">
+      <label for="fTime">Time</label>
+      <input id="fTime" type="time" value="09:00">
+    </div>
+    <div class="form-field full">
+      <label for="fPriority">Importance</label>
+      <select id="fPriority" onchange="updatePriorityHelp()">
+        <option value="critical">Critical</option>
+        <option value="important">Important</option>
+        <option value="flexible" selected>Flexible</option>
+      </select>
+      <div class="priority-help" id="priorityHelpText"></div>
+    </div>
+    <div class="form-field full">
+      <label>Repeats on</label>
+      <div class="day-picker" id="dayPicker"></div>
+    </div>
+    <div class="form-field full">
+      <label for="fGrace">Notify family if missed for longer than (minutes)</label>
+      <input id="fGrace" type="number" min="1" max="180" value="20">
+    </div>
+    <div class="form-field full">
+      <label for="fGifUrl">GIF shown on their alarm screen (optional)</label>
+      <input id="fGifUrl" type="url" placeholder="https://example.com/lunch.gif" oninput="updateGifPreview()">
+      <div class="priority-help">Must be a direct link to the image file itself (usually ends in .gif), not a page that shows the gif. On Giphy/Tenor, right-click the gif and choose "Copy image address" — a share-page link won't load.</div>
+      <div class="gif-upload-row">
+        <input type="file" id="fGifFile" class="legal-file-input" accept=".gif,image/gif" onchange="handleGifFileChange(event)">
+        <button type="button" class="btn small" onclick="document.getElementById('fGifFile').click()">Upload a GIF from your device</button>
+        <span class="priority-help" style="margin:0;">or pick one from your Downloads folder</span>
+      </div>
+      <img id="gifPreview" src="" alt="" style="display:none;width:64px;height:64px;object-fit:cover;border-radius:10px;margin-top:6px;" onload="handleGifPreviewLoad()" onerror="handleGifPreviewError()">
+      <div id="fGifError" class="form-error hidden">Couldn't load that link as an image. Double-check it points straight to the file (and doesn't need a login or block outside sites from loading it).</div>
+    </div>
+    <div class="form-actions">
+      <button class="btn ghost" onclick="closeForm()">Cancel</button>
+      <button class="btn primary" onclick="submitForm()">Save activity</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div id="deleteModal" class="modal-backdrop hidden">
+  <div class="modal-sheet">
+    <h2 id="deleteModalTitle" style="font-family:var(--font-display);margin:0 0 4px;font-size:18px;">Remove this activity?</h2>
+    <p id="deleteModalSub" class="sub" style="margin-bottom:16px;">This can't be undone — it will be removed from the schedule entirely.</p>
+    <div class="form-actions">
+      <button class="btn ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastStack" class="toast-stack"></div>
+
+<script>
+/* ============================================================
+   DATA MODEL
+   ============================================================ */
+const STORAGE_KEY = 'careapp-data';
+
+const DAY_LABELS = ['S','M','T','W','T','F','S'];
+const DAY_NAMES  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const PRIORITY_CONFIG = {
+  critical:  {label:'Critical',  grace:10, snoozeAllowed:0, snoozeMinutes:0,
+              help:"The alarm keeps sounding until it's confirmed done. No snoozing — use this for things like medicine."},
+  important: {label:'Important', grace:20, snoozeAllowed:1, snoozeMinutes:10,
+              help:"One reminder snooze (10 minutes) is allowed before it's flagged as missed."},
+  flexible:  {label:'Flexible',  grace:45, snoozeAllowed:3, snoozeMinutes:15,
+              help:"Can be delayed a few times. Good for things that aren't time-critical."},
+};
+
+function defaultActivities(){
+  return [
+    {id:uid(), name:'Lunch', time:'12:30', priority:'important', days:[0,1,2,3,4,5,6], graceMinutes:20, gifUrl:''},
+  ];
+}
+
+let state = {
+  activities: [],
+  statusLog: {},      // "YYYY-MM-DD|activityId" -> {status, triggeredAt, delayedUntil, snoozeCount, doneAt}
+  notifications: [],  // {id, activityId, activityName, icon, type, time, date, seen}
+  testLog: {},         // activityId -> {status, triggeredAt, delayedUntil, testOverride, snoozeCount} — "Test now" runs, kept
+                        // fully separate from statusLog so testing an activity can never mark the real day's task as done/missed
+  legalDocuments: [],  // {id, name, size, uploadedAt} — uploading at least one unlocks the rest of the family view
+};
+
+let currentView = 'family';
+let formOpen = false;
+let editingId = null;
+let selectedDays = [0,1,2,3,4,5,6];
+let audioCtx = null;
+let alarmIntervalId = null;
+let overlayVisible = false;
+
+function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function statusKey(activity, dateStr){ return (dateStr||todayStr())+'|'+activity.id; }
+function getStatus(activity, dateStr){
+  const key = statusKey(activity, dateStr);
+  if(!state.statusLog[key]) state.statusLog[key] = {status:'pending'};
+  return state.statusLog[key];
+}
+function isScheduledToday(activity){ return activity.days.includes(new Date().getDay()); }
+function displayStatus(activity, dateStr){
+  if(isScheduledToday(activity)) return getStatus(activity, dateStr);
+  return {status:'pending'};
+}
+function formatTime(hhmm){
+  const [h,m] = hhmm.split(':').map(Number);
+  const ampm = h>=12 ? 'PM':'AM';
+  let h12 = h%12; if(h12===0) h12=12;
+  return h12+':'+String(m).padStart(2,'0')+' '+ampm;
+}
+function formatFileSize(bytes){
+  if(bytes==null) return '';
+  if(bytes < 1024) return bytes+' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0)+' KB';
+  return (bytes/(1024*1024)).toFixed(1)+' MB';
+}
+function formatDocDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+}
+function daysLabel(days){
+  if(days.length===7) return 'Every day';
+  const sorted = [...days].sort();
+  return sorted.map(d=>DAY_NAMES[d].slice(0,3)).join(', ');
+}
+function getScheduledDateTime(activity, dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const [hh,mm] = activity.time.split(':').map(Number);
+  return new Date(y, m-1, d, hh, mm, 0, 0);
+}
+function getEffectiveTime(activity, status, dateStr){
+  if(status.testOverride) return new Date(status.testOverride);
+  if(status.delayedUntil) return new Date(status.delayedUntil);
+  return getScheduledDateTime(activity, dateStr);
+}
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, true);
+    if(res && res.value){
+      const parsed = JSON.parse(res.value);
+      state = Object.assign({activities:[],statusLog:{},notifications:[],testLog:{},legalDocuments:[]}, parsed);
+    } else {
+      state.activities = defaultActivities();
+      await saveState();
+    }
+  } catch(e){
+    state.activities = defaultActivities();
+    await saveState();
+  }
+  document.getElementById('loadingSplash').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  fullRender();
+  setInterval(tick, 1000);
+}
+async function saveState(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state), true); }
+  catch(e){ console.error('Could not save', e); }
+}
+
+/* ============================================================
+   SCHEDULE ENGINE
+   ============================================================ */
+function checkSchedule(){
+  let changed = false;
+  const dateStr = todayStr();
+  const now = Date.now();
+  state.activities.forEach(activity=>{
+    if(!isScheduledToday(activity)) return;
+    const status = getStatus(activity, dateStr);
+    if(['done','missed','help_resolved'].includes(status.status)) return;
+
+    const sched = getEffectiveTime(activity, status, dateStr);
+    if(now >= sched.getTime()){
+      if(status.status==='pending' || status.status==='delayed'){
+        status.status='alarming';
+        status.triggeredAt=now;
+        delete status.delayedUntil;
+        changed=true;
+      }
+      if(status.status==='alarming'){
+        const cfg = PRIORITY_CONFIG[activity.priority];
+        const graceMin = (activity.graceMinutes!=null?activity.graceMinutes:cfg.grace);
+        if(now - status.triggeredAt > graceMin*60000){
+          status.status='missed';
+          addNotification(activity,'missed');
+          changed=true;
+        }
+      }
+    }
+  });
+
+  // Test alarms (from "Test now") live in their own store — they must never
+  // read from or write into today's real statusLog entry, or a test could
+  // mark the actual scheduled task as done/missed.
+  Object.keys(state.testLog).forEach(actId=>{
+    const activity = findActivity(actId);
+    const status = state.testLog[actId];
+    if(!activity || !status) return;
+    const sched = status.testOverride!=null ? new Date(status.testOverride) : getScheduledDateTime(activity, dateStr);
+    if(now >= sched.getTime()){
+      if(status.status==='pending' || status.status==='delayed'){
+        status.status='alarming';
+        status.triggeredAt=now;
+        delete status.delayedUntil;
+        delete status.testOverride;
+        changed=true;
+      } else if(status.status==='alarming'){
+        const cfg = PRIORITY_CONFIG[activity.priority];
+        const graceMin = (activity.graceMinutes!=null?activity.graceMinutes:cfg.grace);
+        if(now - status.triggeredAt > graceMin*60000){
+          delete state.testLog[actId];
+          changed=true;
+        }
+      }
+    }
+  });
+  return changed;
+}
+function addNotification(activity, type){
+  state.notifications.unshift({
+    id:uid(), activityId:activity.id, activityName:activity.name,
+    type, time:Date.now(), date:todayStr(), seen:false
+  });
+  const msg = type==='missed'
+    ? `${activity.name} was missed today.`
+    : `Help requested for ${activity.name}.`;
+  showToast(msg, type==='help');
+}
+function getActiveAlarm(){
+  const dateStr = todayStr();
+  let best=null;
+  state.activities.forEach(activity=>{
+    if(!isScheduledToday(activity)) return;
+    const status = state.statusLog[statusKey(activity, dateStr)];
+    if(!status) return;
+    if(status.status==='alarming'){
+      if(!best || status.triggeredAt < best.status.triggeredAt) best={activity, status, isTest:false};
+    }
+  });
+  Object.keys(state.testLog).forEach(actId=>{
+    const activity = findActivity(actId);
+    const status = state.testLog[actId];
+    if(!activity || !status) return;
+    if(status.status==='alarming'){
+      if(!best || status.triggeredAt < best.status.triggeredAt) best={activity, status, isTest:true};
+    }
+  });
+  return best;
+}
+function getNextUp(){
+  const dateStr = todayStr();
+  let best=null;
+  state.activities.forEach(activity=>{
+    if(!isScheduledToday(activity)) return;
+    const status = getStatus(activity, dateStr);
+    if(['done','missed','help_resolved'].includes(status.status)) return;
+    const t = getEffectiveTime(activity, status, dateStr).getTime();
+    if(!best || t < best.t) best = {activity, status, t};
+  });
+  return best;
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+function markDone(activity){
+  const status = getStatus(activity, todayStr());
+  status.status='done'; status.doneAt=Date.now();
+  delete status.delayedUntil; delete status.testOverride;
+  stopAlarmSound();
+  saveState(); fullRender();
+}
+function canDelay(activity, status){
+  const cfg = PRIORITY_CONFIG[activity.priority];
+  return cfg.snoozeAllowed > (status.snoozeCount||0);
+}
+function delayActivity(activity){
+  const cfg = PRIORITY_CONFIG[activity.priority];
+  if(cfg.snoozeMinutes<=0) return;
+  const status = getStatus(activity, todayStr());
+  status.snoozeCount = (status.snoozeCount||0)+1;
+  status.status='delayed';
+  status.delayedUntil = Date.now() + cfg.snoozeMinutes*60000;
+  stopAlarmSound();
+  saveState(); fullRender();
+}
+function requestHelp(activity){
+  const status = getStatus(activity, todayStr());
+  status.status='help_resolved';
+  addNotification(activity,'help');
+  stopAlarmSound();
+  saveState(); fullRender();
+}
+function testNow(activity){
+  state.testLog[activity.id] = {status:'pending', testOverride: Date.now()+3000};
+  saveState(); fullRender();
+  showToast(`Test: ${activity.name} will ring in 3 seconds on the loved one's view. This won't affect today's real reminder.`);
+}
+let pendingDeleteId = null;
+let pendingDeleteType = 'activity';
+function deleteActivity(id){
+  pendingDeleteId = id;
+  pendingDeleteType = 'activity';
+  document.getElementById('deleteModalTitle').textContent = 'Remove this activity?';
+  document.getElementById('deleteModalSub').textContent = "This can't be undone — it will be removed from the schedule entirely.";
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+function deleteLegalDocument(id){
+  pendingDeleteId = id;
+  pendingDeleteType = 'legalDoc';
+  document.getElementById('deleteModalTitle').textContent = 'Remove this document?';
+  const remaining = (state.legalDocuments||[]).length - 1;
+  document.getElementById('deleteModalSub').textContent = remaining>0
+    ? "This can't be undone."
+    : "This can't be undone — with no documents uploaded, the rest of the app will lock again.";
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+function closeDeleteModal(){
+  pendingDeleteId = null;
+  document.getElementById('deleteModal').classList.add('hidden');
+}
+function confirmDelete(){
+  if(!pendingDeleteId) return;
+  if(pendingDeleteType==='legalDoc'){
+    state.legalDocuments = state.legalDocuments.filter(d=>d.id!==pendingDeleteId);
+    if(!legalUnlocked() && LOCKED_UNTIL_UPLOAD_SCREENS.includes(familyScreen)) familyScreen = 'home';
+  } else {
+    state.activities = state.activities.filter(a=>a.id!==pendingDeleteId);
+  }
+  pendingDeleteId = null;
+  document.getElementById('deleteModal').classList.add('hidden');
+  saveState(); fullRender();
+}
+function handleLegalFileChange(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  const wasLocked = !legalUnlocked();
+  state.legalDocuments.push({id:uid(), name:file.name, size:file.size, uploadedAt:Date.now()});
+  saveState(); fullRender();
+  showToast(wasLocked
+    ? `${file.name} uploaded — the rest of the app is now unlocked.`
+    : `${file.name} uploaded.`);
+}
+function markAllNotifsSeen(){
+  state.notifications.forEach(n=>n.seen=true);
+  saveState(); fullRender();
+}
+
+/* ============================================================
+   ALARM SOUND (gentle two-tone chime, no sirens)
+   ============================================================ */
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+}
+function playChimeOnce(){
+  if(!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [880, 1108.73].forEach((freq,i)=>{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type='sine'; osc.frequency.value=freq;
+    gain.gain.setValueAtTime(0, now+i*0.18);
+    gain.gain.linearRampToValueAtTime(0.32, now+i*0.18+0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, now+i*0.18+0.65);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now+i*0.18); osc.stop(now+i*0.18+0.7);
+  });
+}
+function startAlarmSound(){
+  if(alarmIntervalId) return;
+  ensureAudio();
+  playChimeOnce();
+  alarmIntervalId = setInterval(playChimeOnce, 2600);
+}
+function stopAlarmSound(){
+  if(alarmIntervalId){ clearInterval(alarmIntervalId); alarmIntervalId=null; }
+  stopVoiceReminders();
+}
+
+/* ============================================================
+   VOICE ANNOUNCEMENTS (browser's built-in text-to-speech)
+   ============================================================ */
+let lastAnnouncedKey = null;
+let voiceIntervalId = null;
+let voiceStartTimeoutId = null;
+const VOICE_REMINDER_MS = 20000;
+const CHIME_INTERVAL_MS = 2600;
+const CHIMES_BEFORE_VOICE = 3;
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  try{
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.92;
+    utter.pitch = 1;
+    utter.volume = 1;
+    window.speechSynthesis.speak(utter);
+  }catch(e){ /* speech synthesis not available — the chime still plays */ }
+}
+function startVoiceReminders(activity, status){
+  const key = activity.id+':'+status.triggeredAt;
+  if(lastAnnouncedKey === key) return; // already scheduled/speaking for this alarm session
+  lastAnnouncedKey = key;
+  const message = `It's time for ${activity.name}.`;
+  voiceStartTimeoutId = setTimeout(()=>{
+    voiceStartTimeoutId = null;
+    speak(message);
+    if(!voiceIntervalId){
+      voiceIntervalId = setInterval(()=>{ speak(message); }, VOICE_REMINDER_MS);
+    }
+  }, CHIME_INTERVAL_MS * CHIMES_BEFORE_VOICE);
+}
+function stopVoiceReminders(){
+  if('speechSynthesis' in window){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  if(voiceIntervalId){ clearInterval(voiceIntervalId); voiceIntervalId=null; }
+  if(voiceStartTimeoutId){ clearTimeout(voiceStartTimeoutId); voiceStartTimeoutId=null; }
+  lastAnnouncedKey = null;
+}
+document.addEventListener('click', ()=>{
+  ensureAudio();
+  // Warm up speech synthesis on the first tap — some browsers (notably iOS
+  // Safari) only allow it to start speaking after a real user gesture.
+  if('speechSynthesis' in window){
+    try{
+      const primer = new SpeechSynthesisUtterance('');
+      primer.volume = 0;
+      window.speechSynthesis.speak(primer);
+    }catch(e){}
+  }
+}, {once:true});
+
+/* ============================================================
+   TICK LOOP
+   ============================================================ */
+function tick(){
+  updateClocks();
+  const changed = checkSchedule();
+  if(changed){
+    saveState();
+    fullRender();
+  } else if(currentView==='elderly'){
+    renderElderly();
+    renderAlarmOverlay();
+  } else {
+    updateBellBadge();
+  }
+}
+function updateClocks(){
+  // No visible clock/date in the header anymore — each screen shows its
+  // own date pill instead, updated from renderFamily().
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function fullRender(){
+  renderFamily();
+  renderElderly();
+  renderAlarmOverlay();
+  updateClocks();
+}
+
+function setView(view){
+  currentView = view;
+  document.getElementById('familyView').classList.toggle('hidden', view!=='family');
+  document.getElementById('elderlyView').classList.toggle('hidden', view!=='elderly');
+  document.getElementById('btnFamilyView').classList.toggle('active', view==='family');
+  document.getElementById('btnElderlyView').classList.toggle('active', view==='elderly');
+  fullRender();
+}
+
+let familyScreen = 'home';
+const LOCKED_UNTIL_UPLOAD_SCREENS = ['upcoming','existing','addRemove','notifications'];
+function legalUnlocked(){ return (state.legalDocuments||[]).length>0; }
+function goFamilyScreen(screen){
+  if(LOCKED_UNTIL_UPLOAD_SCREENS.includes(screen) && !legalUnlocked()){
+    showToast('Upload a legal document first to unlock this.');
+    return;
+  }
+  familyScreen = screen;
+  renderFamily();
+}
+function goFamilyHome(){ goFamilyScreen('home'); }
+
+/* ---- Status icons matching the SimpleLife mockups ---- */
+function iconDone(){
+  return `<svg class="t-icon" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="21" fill="url(#brandGreenGrad)"/><path d="M13 22.5l6 6 12-12" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function iconPending(){
+  return `<svg class="t-icon" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="none" stroke="#00306D" stroke-width="2.2"/><path d="M13 22.5l6 6 12-12" stroke="#00306D" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function iconMissed(){
+  return `<svg class="t-icon" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="21" fill="#00306D"/><rect x="19.3" y="11" width="5.4" height="16" rx="2.7" fill="#fff"/><rect x="19.3" y="29.5" width="5.4" height="5.4" rx="2.7" fill="#fff"/></svg>`;
+}
+function statusIcon(statusKey){
+  if(statusKey==='done') return iconDone();
+  if(statusKey==='missed') return iconMissed();
+  return iconPending();
+}
+
+/* ---- Date pill text, e.g. "MONDAY, SEPT 7TH" ---- */
+const MONTH_ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEPT','OCT','NOV','DEC'];
+function ordinalSuffix(n){
+  const j = n%10, k = n%100;
+  if(j===1 && k!==11) return 'ST';
+  if(j===2 && k!==12) return 'ND';
+  if(j===3 && k!==13) return 'RD';
+  return 'TH';
+}
+function todayPillText(){
+  const now = new Date();
+  const day = now.getDate();
+  return `${DAY_NAMES[now.getDay()].toUpperCase()}, ${MONTH_ABBR[now.getMonth()]} ${day}${ordinalSuffix(day)}`;
+}
+
+function familyMarkDone(id){
+  const activity = findActivity(id);
+  if(activity) markDone(activity);
+}
+
+function renderFamily(){
+  const dateStr = todayStr();
+
+  document.getElementById('familyHomeScreen').classList.toggle('hidden', familyScreen!=='home');
+  document.getElementById('familyUpcomingScreen').classList.toggle('hidden', familyScreen!=='upcoming');
+  document.getElementById('familyExistingScreen').classList.toggle('hidden', familyScreen!=='existing');
+  document.getElementById('familyAddRemoveScreen').classList.toggle('hidden', familyScreen!=='addRemove');
+  document.getElementById('familyNotifScreen').classList.toggle('hidden', familyScreen!=='notifications');
+  document.getElementById('familyLegalScreen').classList.toggle('hidden', familyScreen!=='legal');
+  document.getElementById('familyBackBtn').classList.toggle('hidden', familyScreen==='home');
+
+  const pillText = todayPillText();
+  ['upcomingDatePill','existingDatePill','addRemoveDatePill','notifDatePill','legalDatePill'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = pillText;
+  });
+
+  // ---- Home nav pills: everything but Legal documents stays locked until a document is uploaded ----
+  const unlocked = legalUnlocked();
+  [
+    ['navPillUpcoming','Upcoming tasks'],
+    ['navPillExisting','Existing tasks'],
+    ['navPillAddRemove','Add / remove task'],
+  ].forEach(([id,label])=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.toggle('locked', !unlocked);
+  });
+  const notifPill = document.getElementById('navPillNotifications');
+  if(notifPill) notifPill.classList.toggle('locked', !unlocked);
+  document.getElementById('legalUploadBox').classList.toggle('unlocked', unlocked);
+  document.getElementById('legalHint').textContent = unlocked
+    ? "You're all set — the rest of the app is unlocked. Add more documents any time."
+    : 'Upload a legal document (like power of attorney or an advance directive) to unlock the rest of the app.';
+
+  // ---- Legal documents list ----
+  const legalDocList = document.getElementById('legalDocList');
+  if((state.legalDocuments||[]).length===0){
+    legalDocList.innerHTML = '<p class="empty-note">No documents uploaded yet.</p>';
+  } else {
+    legalDocList.innerHTML = [...state.legalDocuments].sort((a,b)=>b.uploadedAt-a.uploadedAt).map(doc=>{
+      return `
+        <div class="task-row legal-doc-row">
+          ${iconDone()}
+          <div class="t-body">
+            <div class="t-text">${escapeHtml(doc.name)}</div>
+            <div class="t-caption">${formatFileSize(doc.size)} · uploaded ${formatDocDate(doc.uploadedAt)}</div>
+            <div class="t-actions">
+              <button class="btn small danger-text" onclick="deleteLegalDocument('${doc.id}')">Remove</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  const sortedAll = [...state.activities].sort((a,b)=> a.time.localeCompare(b.time));
+
+  // ---- Upcoming tasks: today's schedule, not yet resolved — tap the circle to mark it done ----
+  const upcomingList = document.getElementById('upcomingList');
+  const upcoming = sortedAll
+    .filter(isScheduledToday)
+    .map(activity=>({activity, status:getStatus(activity, dateStr)}))
+    .filter(({status})=> !['done','missed','help_resolved'].includes(status.status));
+  if(upcoming.length===0){
+    upcomingList.innerHTML = '<p class="empty-note">Nothing left in today\'s schedule.</p>';
+  } else {
+    upcomingList.innerHTML = upcoming.map(({activity})=>{
+      return `
+        <div class="task-row">
+          <button class="t-icon-btn" onclick="familyMarkDone('${activity.id}')" aria-label="Mark ${escapeHtml(activity.name)} as done">${iconPending()}</button>
+          <div class="t-body">
+            <div class="t-text"><span class="t-time">${formatTime(activity.time)}</span> ${escapeHtml(activity.name)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ---- Existing tasks: every task, every day — read-only overview ----
+  const existingList = document.getElementById('existingList');
+  if(sortedAll.length===0){
+    existingList.innerHTML = '<p class="empty-note">No tasks yet — add one with the + button.</p>';
+  } else {
+    existingList.innerHTML = sortedAll.map(activity=>{
+      const status = displayStatus(activity, dateStr);
+      return `
+        <div class="task-row ${status.status==='done'?'done':''}">
+          ${statusIcon(status.status)}
+          <div class="t-body">
+            <div class="t-text"><span class="t-time">${formatTime(activity.time)}</span> ${escapeHtml(activity.name)}</div>
+            <div class="t-caption">${daysLabel(activity.days)} · ${PRIORITY_CONFIG[activity.priority].label}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ---- Add/Remove: full control — add via the + button, edit, test, or remove per row ----
+  const removeList = document.getElementById('removeList');
+  if(sortedAll.length===0){
+    removeList.innerHTML = '<p class="empty-note">No tasks yet — tap + to add one.</p>';
+  } else {
+    removeList.innerHTML = sortedAll.map(activity=>{
+      const status = displayStatus(activity, dateStr);
+      return `
+        <div class="task-row ${status.status==='done'?'done':''}">
+          ${statusIcon(status.status)}
+          <div class="t-body">
+            <div class="t-text"><span class="t-time">${formatTime(activity.time)}</span> ${escapeHtml(activity.name)}</div>
+            <div class="t-caption">${daysLabel(activity.days)}</div>
+            <div class="t-actions">
+              <button class="btn small" onclick="testNow(findActivity('${activity.id}'))">Test now</button>
+              <button class="btn small" onclick="openForm('${activity.id}')">Edit</button>
+              <button class="btn small danger-text" onclick="deleteActivity('${activity.id}')">Remove</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ---- Notifications ----
+  const notifList = document.getElementById('notifList');
+  const todays = state.notifications.filter(n=>n.date===dateStr);
+  if(todays.length===0){
+    notifList.innerHTML = '<p class="empty-note">Nothing to report today.</p>';
+  } else {
+    notifList.innerHTML = todays.map(n=>{
+      const time = new Date(n.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+      const verb = n.type==='missed' ? 'not done' : 'needs help';
+      return `
+        <div class="task-row">
+          ${iconMissed()}
+          <div class="t-body">
+            <div class="t-text"><span class="t-time">${time}</span> ${escapeHtml(n.activityName)} ${verb}</div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  updateBellBadge();
+}
+
+function updateBellBadge(){
+  const unseen = state.notifications.filter(n=>n.date===todayStr() && !n.seen).length;
+  const badge = document.getElementById('bellBadgeHome');
+  if(!badge) return;
+  if(unseen>0){ badge.textContent = unseen; badge.classList.remove('hidden'); }
+  else{ badge.classList.add('hidden'); }
+}
+
+function renderElderly(){
+  // Idle state is intentionally just the calm SimpleLife mark — no schedule
+  // preview, nothing to parse. The alarm overlay is the only thing that
+  // interrupts it, and only when something is actually due.
+}
+
+
+let alarmActivityRef = null;
+let alarmActivityIsTest = false;
+let lastCompletedActivity = null;
+let lastCompletedAt = 0;
+const CONFIRM_DISPLAY_MS = 2200;
+
+function renderAlarmOverlay(){
+  const overlay = document.getElementById('alarmOverlay');
+  const alarmMode = document.getElementById('alarmModeContent');
+  const confirmMode = document.getElementById('confirmModeContent');
+
+  if(currentView!=='elderly'){
+    overlay.classList.add('hidden'); overlayVisible=false; stopAlarmSound(); return;
+  }
+
+  const active = getActiveAlarm();
+  if(active){
+    const {activity, status, isTest} = active;
+    alarmActivityRef = activity;
+    alarmActivityIsTest = !!isTest;
+    document.getElementById('alarmTitle').textContent = activity.name;
+    const gifEl = document.getElementById('alarmGif');
+    if(activity.gifUrl){
+      if(gifEl.dataset.src !== activity.gifUrl){
+        gifEl.src = activity.gifUrl;
+        gifEl.dataset.src = activity.gifUrl;
+      }
+      gifEl.style.display='block';
+    } else if(gifEl.dataset.src){
+      gifEl.removeAttribute('src');
+      delete gifEl.dataset.src;
+      gifEl.style.display='none';
+    }
+    const cfg = PRIORITY_CONFIG[activity.priority];
+    const snoozeWrap = document.getElementById('alarmSnoozeBtnWrap');
+    snoozeWrap.innerHTML = canDelay(activity, status)
+      ? `<button class="action-pill snooze" onclick="handleAlarmSnooze()">Snooze</button>`
+      : '';
+    alarmMode.classList.remove('hidden');
+    confirmMode.classList.add('hidden');
+    if(!overlayVisible){ overlay.classList.remove('hidden'); overlayVisible=true; }
+    startAlarmSound();
+    startVoiceReminders(activity, status);
+    return;
+  }
+
+  stopAlarmSound();
+
+  if(lastCompletedActivity && (Date.now()-lastCompletedAt) < CONFIRM_DISPLAY_MS){
+    document.getElementById('confirmTitle').textContent = lastCompletedActivity.name;
+    confirmMode.classList.remove('hidden');
+    alarmMode.classList.add('hidden');
+    overlay.classList.remove('hidden'); overlayVisible=true;
+    return;
+  }
+
+  overlay.classList.add('hidden'); overlayVisible=false;
+}
+function handleAlarmDone(){
+  if(!alarmActivityRef) return;
+  lastCompletedActivity = alarmActivityRef;
+  lastCompletedAt = Date.now();
+  if(alarmActivityIsTest){
+    delete state.testLog[alarmActivityRef.id];
+    stopAlarmSound();
+    saveState(); fullRender();
+  } else {
+    markDone(alarmActivityRef);
+  }
+  speak('All done. Well done!');
+}
+function handleAlarmSnooze(){
+  if(!alarmActivityRef) return;
+  if(alarmActivityIsTest){
+    const cfg = PRIORITY_CONFIG[alarmActivityRef.priority];
+    if(cfg.snoozeMinutes<=0) return;
+    const status = state.testLog[alarmActivityRef.id];
+    if(!status) return;
+    status.snoozeCount = (status.snoozeCount||0)+1;
+    status.status='delayed';
+    status.delayedUntil = Date.now() + cfg.snoozeMinutes*60000;
+    stopAlarmSound();
+    saveState(); fullRender();
+  } else {
+    delayActivity(alarmActivityRef);
+  }
+}
+function handleAlarmHelp(){
+  if(!alarmActivityRef) return;
+  if(alarmActivityIsTest){
+    delete state.testLog[alarmActivityRef.id];
+    stopAlarmSound();
+    saveState(); fullRender();
+  } else {
+    requestHelp(alarmActivityRef);
+  }
+}
+
+/* ============================================================
+   PANELS / MODAL
+   ============================================================ */
+function findActivity(id){ return state.activities.find(a=>a.id===id); }
+
+function buildDayPicker(){
+  const wrap = document.getElementById('dayPicker');
+  wrap.innerHTML = DAY_LABELS.map((lbl,i)=>`<div class="day-chip ${selectedDays.includes(i)?'on':''}" data-day="${i}" onclick="toggleDay(${i})">${lbl}</div>`).join('');
+}
+function toggleDay(i){
+  if(selectedDays.includes(i)) selectedDays = selectedDays.filter(d=>d!==i);
+  else selectedDays.push(i);
+  if(selectedDays.length===0) selectedDays=[i];
+  buildDayPicker();
+}
+function updatePriorityHelp(){
+  const p = document.getElementById('fPriority').value;
+  document.getElementById('priorityHelpText').textContent = PRIORITY_CONFIG[p].help;
+  document.getElementById('fGrace').value = PRIORITY_CONFIG[p].grace;
+}
+function openForm(id){
+  editingId = id || null;
+  const modal = document.getElementById('formModal');
+  document.getElementById('fNameError').classList.add('hidden');
+  if(editingId){
+    const a = findActivity(editingId);
+    document.getElementById('formTitle').textContent = 'Edit activity';
+    document.getElementById('fName').value = a.name;
+    document.getElementById('fTime').value = a.time;
+    document.getElementById('fPriority').value = a.priority;
+    document.getElementById('fGrace').value = a.graceMinutes!=null ? a.graceMinutes : PRIORITY_CONFIG[a.priority].grace;
+    document.getElementById('fGifUrl').value = a.gifUrl || '';
+    selectedDays = [...a.days];
+  } else {
+    document.getElementById('formTitle').textContent = 'Add an activity';
+    document.getElementById('fName').value = '';
+    document.getElementById('fTime').value = '09:00';
+    document.getElementById('fPriority').value = 'flexible';
+    document.getElementById('fGrace').value = PRIORITY_CONFIG.flexible.grace;
+    document.getElementById('fGifUrl').value = '';
+    selectedDays = [0,1,2,3,4,5,6];
+  }
+  buildDayPicker();
+  updatePriorityHelp();
+  updateGifPreview();
+  modal.classList.remove('hidden');
+  formOpen = true;
+}
+function updateGifPreview(){
+  const url = document.getElementById('fGifUrl').value.trim();
+  const preview = document.getElementById('gifPreview');
+  document.getElementById('fGifError').classList.add('hidden');
+  if(url){ preview.style.display='none'; preview.src = url; }
+  else { preview.style.display='none'; preview.removeAttribute('src'); }
+}
+function handleGifFileChange(event){
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if(!file) return;
+  if(!/^image\/gif$/.test(file.type) && !/\.gif$/i.test(file.name)){
+    showToast("That doesn't look like a GIF file.");
+    return;
+  }
+  const MAX_BYTES = 5*1024*1024;
+  if(file.size > MAX_BYTES){
+    showToast('That GIF is too large (max 5MB) — try a smaller one.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('fGifUrl').value = reader.result;
+    updateGifPreview();
+    showToast(`${file.name} added.`);
+  };
+  reader.onerror = () => showToast("Couldn't read that file — please try again.");
+  reader.readAsDataURL(file);
+}
+function handleGifPreviewLoad(){
+  document.getElementById('gifPreview').style.display='block';
+  document.getElementById('fGifError').classList.add('hidden');
+}
+function handleGifPreviewError(){
+  const url = document.getElementById('fGifUrl').value.trim();
+  document.getElementById('gifPreview').style.display='none';
+  document.getElementById('fGifError').classList.toggle('hidden', !url);
+}
+function closeForm(){
+  document.getElementById('formModal').classList.add('hidden');
+  formOpen = false; editingId = null;
+}
+function submitForm(){
+  const name = document.getElementById('fName').value.trim();
+  const nameError = document.getElementById('fNameError');
+  if(!name){ nameError.classList.remove('hidden'); return; }
+  nameError.classList.add('hidden');
+  const time = document.getElementById('fTime').value || '09:00';
+  const priority = document.getElementById('fPriority').value;
+  const graceMinutes = Math.max(1, parseInt(document.getElementById('fGrace').value,10) || PRIORITY_CONFIG[priority].grace);
+  const gifUrl = document.getElementById('fGifUrl').value.trim();
+  const days = [...selectedDays];
+
+  if(editingId){
+    const a = findActivity(editingId);
+    Object.assign(a, {name, time, priority, days, graceMinutes, gifUrl});
+  } else {
+    state.activities.push({id:uid(), name, time, priority, days, graceMinutes, gifUrl});
+  }
+  closeForm();
+  saveState(); fullRender();
+}
+
+/* ============================================================
+   TOASTS + UTIL
+   ============================================================ */
+function showToast(msg, urgent){
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className = 'toast'+(urgent?' urgent':'');
+  el.textContent = msg;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 4200);
+}
+function escapeHtml(str){
+  return str.replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+loadState();
+</script>
+</body>
+</html>
