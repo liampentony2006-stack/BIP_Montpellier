@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SimpleLife — Care Schedule</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -182,6 +182,7 @@
   .day-chip{
     flex:1;text-align:center;padding:8px 0;border:1px solid var(--line);border-radius:8px;
     font-size:12px;font-weight:700;background:#fff;color:var(--ink-soft);
+    font-family:inherit;line-height:1.2;min-height:34px;
   }
   .day-chip.on{background:var(--brand);color:#fff;border-color:var(--brand);}
   .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
@@ -450,7 +451,7 @@
 
 </div>
 
-<div id="alarmOverlay" class="alarm-overlay hidden">
+<div id="alarmOverlay" class="alarm-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="alarmTitle">
   <span class="brand-logo sm alarm-overlay-logo">
     <span class="word-simple">Simple</span><span class="word-life">Life</span>
     <svg class="check-badge" viewBox="0 0 24 24" aria-hidden="true">
@@ -487,13 +488,13 @@
 
 <!-- Add / edit activity modal -->
 <div id="formModal" class="modal-backdrop hidden">
-  <div class="modal-sheet">
+  <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
     <h2 style="font-family:var(--font-display);margin:0 0 4px;font-size:18px;" id="formTitle">Add an activity</h2>
     <p class="sub" style="margin-bottom:16px;">Set what it is, when, and how important it is.</p>
     <div class="form-field full">
       <label for="fName">Activity name</label>
-      <input id="fName" type="text" placeholder="e.g. Morning medicine">
-      <div id="fNameError" class="form-error hidden">Please give this activity a name.</div>
+      <input id="fName" type="text" placeholder="e.g. Morning medicine" aria-describedby="fNameError">
+      <div id="fNameError" class="form-error hidden" role="alert">Please give this activity a name.</div>
     </div>
     <div class="form-field">
       <label for="fTime">Time</label>
@@ -525,7 +526,7 @@
         <button type="button" class="btn small" onclick="document.getElementById('fGifFile').click()">Upload a GIF from your device</button>
         <span class="priority-help" style="margin:0;">or pick one from your Downloads folder</span>
       </div>
-      <img id="gifPreview" src="" alt="" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:6px;" onload="handleGifPreviewLoad()" onerror="handleGifPreviewError()">
+      <img id="gifPreview" alt="" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:6px;" onload="handleGifPreviewLoad()" onerror="handleGifPreviewError()">
       <div id="fGifError" class="form-error hidden">Couldn't load that link as an image. Double-check it points straight to the file (and doesn't need a login or block outside sites from loading it).</div>
     </div>
     <div class="form-actions">
@@ -537,7 +538,7 @@
 
 <!-- Delete confirmation modal -->
 <div id="deleteModal" class="modal-backdrop hidden">
-  <div class="modal-sheet">
+  <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" aria-describedby="deleteModalSub">
     <h2 id="deleteModalTitle" style="font-family:var(--font-display);margin:0 0 4px;font-size:18px;">Remove this activity?</h2>
     <p id="deleteModalSub" class="sub" style="margin-bottom:16px;">This can't be undone — it will be removed from the schedule entirely.</p>
     <div class="form-actions">
@@ -547,7 +548,7 @@
   </div>
 </div>
 
-<div id="toastStack" class="toast-stack"></div>
+<div id="toastStack" class="toast-stack" role="status" aria-live="polite" aria-atomic="false"></div>
 
 <script>
 /* ============================================================
@@ -559,8 +560,8 @@ const DAY_LABELS = ['S','M','T','W','T','F','S'];
 const DAY_NAMES  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 const PRIORITY_CONFIG = {
-  critical:  {label:'Critical',  grace:10, snoozeAllowed:0, snoozeMinutes:0,
-              help:"The alarm keeps sounding until it's confirmed done. No snoozing — use this for things like medicine."},
+  critical:  {label:'Critical',  grace:10, snoozeAllowed:0, snoozeMinutes:0, keepsSounding:true,
+              help:"The alarm keeps sounding until it's confirmed done, and the family is told if it isn't done within 10 minutes. No snoozing — use this for things like medicine."},
   important: {label:'Important', grace:20, snoozeAllowed:1, snoozeMinutes:10,
               help:"One reminder snooze (10 minutes) is allowed before it's flagged as missed."},
   flexible:  {label:'Flexible',  grace:45, snoozeAllowed:3, snoozeMinutes:15,
@@ -596,15 +597,20 @@ function todayStr(){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function statusKey(activity, dateStr){ return (dateStr||todayStr())+'|'+activity.id; }
+/* Use this where the status is about to be changed. */
 function getStatus(activity, dateStr){
   const key = statusKey(activity, dateStr);
   if(!state.statusLog[key]) state.statusLog[key] = {status:'pending'};
   return state.statusLog[key];
 }
+/* Use this where the status is only being read, such as while rendering. */
+function peekStatus(activity, dateStr){
+  return state.statusLog[statusKey(activity, dateStr)] || {status:'pending'};
+}
 function isScheduledToday(activity){ return activity.days.includes(new Date().getDay()); }
 function displayStatus(activity, dateStr){
-  if(isScheduledToday(activity)) return getStatus(activity, dateStr);
-  return {status:'pending'};
+  if(isScheduledToday(activity)) return peekStatus(activity, dateStr);
+  return {status:'not_today'};
 }
 function formatTime(hhmm){
   const [h,m] = hhmm.split(':').map(Number);
@@ -640,18 +646,56 @@ function getEffectiveTime(activity, status, dateStr){
 
 /* ============================================================
    STORAGE
+
+   The schedule has to survive closing the tab, so this picks whichever
+   backend the page actually has. Some hosts inject a window.storage helper;
+   a plain browser does not, and there the browser's own localStorage is used
+   instead. Without this fallback every reload wiped the whole schedule.
    ============================================================ */
+const storageBackend = (function(){
+  if(window.storage && typeof window.storage.get==='function' && typeof window.storage.set==='function'){
+    return {
+      name:'host',
+      get: async key => {
+        const res = await window.storage.get(key, true);
+        return res && res.value != null ? res.value : null;
+      },
+      set: async (key, value) => { await window.storage.set(key, value, true); }
+    };
+  }
+  try{
+    const probe = '__simplelife_probe';
+    window.localStorage.setItem(probe, '1');
+    window.localStorage.removeItem(probe);
+    return {
+      name:'localStorage',
+      get: async key => window.localStorage.getItem(key),
+      set: async (key, value) => { window.localStorage.setItem(key, value); }
+    };
+  }catch(e){
+    // private browsing with storage blocked: keep working for this session only
+    let memory = null;
+    return {
+      name:'memory',
+      get: async () => memory,
+      set: async (key, value) => { memory = value; }
+    };
+  }
+})();
+
 async function loadState(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, true);
-    if(res && res.value){
-      const parsed = JSON.parse(res.value);
+    const raw = await storageBackend.get(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
       state = Object.assign({activities:[],statusLog:{},notifications:[],testLog:{},legalDocuments:[]}, parsed);
+      pruneHistory();
     } else {
       state.activities = defaultActivities();
       await saveState();
     }
   } catch(e){
+    console.error('Could not read the saved schedule, starting fresh', e);
     state.activities = defaultActivities();
     await saveState();
   }
@@ -661,8 +705,29 @@ async function loadState(){
   setInterval(tick, 1000);
 }
 async function saveState(){
-  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state), true); }
+  try{ await storageBackend.set(STORAGE_KEY, JSON.stringify(state)); }
   catch(e){ console.error('Could not save', e); }
+}
+
+/* Keep the saved file from growing for ever. A schedule that runs for years
+   would otherwise accumulate one status entry per task per day, and one
+   notification per miss, until the storage quota is hit. */
+const HISTORY_DAYS = 60;
+const MAX_NOTIFICATIONS = 200;
+function pruneHistory(){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - HISTORY_DAYS);
+  const cutoffStr = cutoff.getFullYear()+'-'+String(cutoff.getMonth()+1).padStart(2,'0')+'-'+String(cutoff.getDate()).padStart(2,'0');
+  let removed = 0;
+  Object.keys(state.statusLog).forEach(key=>{
+    if(key.slice(0,10) < cutoffStr){ delete state.statusLog[key]; removed++; }
+  });
+  state.notifications = state.notifications.filter(n=>n.date >= cutoffStr);
+  if(state.notifications.length > MAX_NOTIFICATIONS){
+    removed += state.notifications.length - MAX_NOTIFICATIONS;
+    state.notifications = state.notifications.slice(0, MAX_NOTIFICATIONS);
+  }
+  return removed > 0;
 }
 
 /* ============================================================
@@ -677,20 +742,39 @@ function checkSchedule(){
     const status = getStatus(activity, dateStr);
     if(['done','missed','help_resolved'].includes(status.status)) return;
 
+    const cfg = PRIORITY_CONFIG[activity.priority];
+    const graceMs = (activity.graceMinutes!=null?activity.graceMinutes:cfg.grace)*60000;
     const sched = getEffectiveTime(activity, status, dateStr);
     if(now >= sched.getTime()){
       if(status.status==='pending' || status.status==='delayed'){
-        status.status='alarming';
-        status.triggeredAt=now;
+        // Count the grace window from the moment the task was actually due,
+        // not from the moment the app happened to notice. Otherwise a tablet
+        // switched on in the evening rings for lunch as if it were due now.
+        status.triggeredAt = sched.getTime();
         delete status.delayedUntil;
+        if(now - status.triggeredAt > graceMs){
+          // The slot came and went while nothing was watching. Tell the
+          // family rather than ringing hours late for something like a pill
+          // that must not be taken twice.
+          status.status='missed';
+          status.missedNotified=true;
+          addNotification(activity,'missed', status.triggeredAt + graceMs);
+        } else {
+          status.status='alarming';
+        }
         changed=true;
       }
-      if(status.status==='alarming'){
-        const cfg = PRIORITY_CONFIG[activity.priority];
-        const graceMin = (activity.graceMinutes!=null?activity.graceMinutes:cfg.grace);
-        if(now - status.triggeredAt > graceMin*60000){
+      if(status.status==='alarming' && now - status.triggeredAt > graceMs){
+        if(!status.missedNotified){
+          status.missedNotified=true;
+          addNotification(activity,'missed', status.triggeredAt + graceMs);
+          changed=true;
+        }
+        // Critical tasks promise to keep sounding until they are confirmed,
+        // so the family is told but the alarm stays up. Everything else
+        // gives up and is recorded as missed.
+        if(!cfg.keepsSounding){
           status.status='missed';
-          addNotification(activity,'missed');
           changed=true;
         }
       }
@@ -703,9 +787,20 @@ function checkSchedule(){
   Object.keys(state.testLog).forEach(actId=>{
     const activity = findActivity(actId);
     const status = state.testLog[actId];
-    if(!activity || !status) return;
-    const sched = status.testOverride!=null ? new Date(status.testOverride) : getScheduledDateTime(activity, dateStr);
-    if(now >= sched.getTime()){
+    if(!activity || !status){
+      // the task was removed while a rehearsal was still queued
+      if(!activity){ delete state.testLog[actId]; changed=true; }
+      return;
+    }
+    // A rehearsal has its own timeline: it starts at testOverride and, if it
+    // is snoozed, resumes at delayedUntil. It must never fall back to the
+    // task's real time of day, or a snoozed rehearsal for a slot earlier in
+    // the day would start ringing again immediately.
+    const dueAt = status.delayedUntil!=null ? status.delayedUntil
+                : status.testOverride!=null ? status.testOverride
+                : status.triggeredAt;
+    if(dueAt==null) return;
+    if(now >= dueAt){
       if(status.status==='pending' || status.status==='delayed'){
         status.status='alarming';
         status.triggeredAt=now;
@@ -724,11 +819,17 @@ function checkSchedule(){
   });
   return changed;
 }
-function addNotification(activity, type){
+/* `atMs` is when the thing actually happened. It matters when the app was
+   closed over the slot: the family should read "12:50 Lunch not done", not
+   the time the tablet was switched back on. */
+function addNotification(activity, type, atMs){
   state.notifications.unshift({
     id:uid(), activityId:activity.id, activityName:activity.name,
-    type, time:Date.now(), date:todayStr(), seen:false
+    type, time: atMs!=null ? atMs : Date.now(), date:todayStr(), seen:false
   });
+  if(state.notifications.length > MAX_NOTIFICATIONS){
+    state.notifications.length = MAX_NOTIFICATIONS;
+  }
   const msg = type==='missed'
     ? `${activity.name} was missed today.`
     : `Help requested for ${activity.name}.`;
@@ -760,7 +861,7 @@ function getNextUp(){
   let best=null;
   state.activities.forEach(activity=>{
     if(!isScheduledToday(activity)) return;
-    const status = getStatus(activity, dateStr);
+    const status = peekStatus(activity, dateStr);
     if(['done','missed','help_resolved'].includes(status.status)) return;
     const t = getEffectiveTime(activity, status, dateStr).getTime();
     if(!best || t < best.t) best = {activity, status, t};
@@ -834,15 +935,26 @@ function confirmDelete(){
     if(!legalUnlocked() && LOCKED_UNTIL_UPLOAD_SCREENS.includes(familyScreen)) familyScreen = 'home';
   } else {
     state.activities = state.activities.filter(a=>a.id!==pendingDeleteId);
+    delete state.testLog[pendingDeleteId];
   }
   pendingDeleteId = null;
   document.getElementById('deleteModal').classList.add('hidden');
   saveState(); fullRender();
 }
+const LEGAL_MAX_BYTES = 20*1024*1024;
+const LEGAL_EXTENSIONS = /\.(pdf|docx?|jpe?g|png)$/i;
 function handleLegalFileChange(event){
   const file = event.target.files && event.target.files[0];
   event.target.value = '';
   if(!file) return;
+  if(!LEGAL_EXTENSIONS.test(file.name)){
+    showToast('Please choose a PDF, Word document or photo.');
+    return;
+  }
+  if(file.size > LEGAL_MAX_BYTES){
+    showToast('That file is too large (max 20MB) — try a smaller scan.');
+    return;
+  }
   const wasLocked = !legalUnlocked();
   state.legalDocuments.push({id:uid(), name:file.name, size:file.size, uploadedAt:Date.now()});
   saveState(); fullRender();
@@ -851,7 +963,10 @@ function handleLegalFileChange(event){
     : `${file.name} uploaded.`);
 }
 function markAllNotifsSeen(){
-  state.notifications.forEach(n=>n.seen=true);
+  // This button sits on the screen that lists today only, so it must not
+  // quietly mark older days read as well.
+  const dateStr = todayStr();
+  state.notifications.forEach(n=>{ if(n.date===dateStr) n.seen=true; });
   saveState(); fullRender();
 }
 
@@ -951,9 +1066,16 @@ document.addEventListener('click', ()=>{
 /* ============================================================
    TICK LOOP
    ============================================================ */
+let lastPrunedOn = null;
 function tick(){
   updateClocks();
-  const changed = checkSchedule();
+  let changed = false;
+  const today = todayStr();
+  if(lastPrunedOn !== today){
+    lastPrunedOn = today;
+    changed = pruneHistory();
+  }
+  changed = checkSchedule() || changed;
   if(changed){
     saveState();
     fullRender();
@@ -1011,10 +1133,26 @@ function iconPending(){
 function iconMissed(){
   return `<svg class="t-icon" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="21" fill="#00306D"/><rect x="19.3" y="11" width="5.4" height="16" rx="2.7" fill="#fff"/><rect x="19.3" y="29.5" width="5.4" height="5.4" rx="2.7" fill="#fff"/></svg>`;
 }
+function iconNotToday(){
+  return `<svg class="t-icon" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="none" stroke="#9EB3AC" stroke-width="2.2" stroke-dasharray="4 3"/></svg>`;
+}
 function statusIcon(statusKey){
   if(statusKey==='done') return iconDone();
   if(statusKey==='missed') return iconMissed();
+  if(statusKey==='not_today') return iconNotToday();
   return iconPending();
+}
+
+/* A locked button stays clickable so that tapping it can explain why it is
+   locked, so aria-disabled is used rather than the disabled attribute. */
+function markPillLock(el, unlocked, label){
+  if(unlocked){
+    el.removeAttribute('aria-disabled');
+    el.setAttribute('aria-label', label);
+  } else {
+    el.setAttribute('aria-disabled','true');
+    el.setAttribute('aria-label', label+' - locked until a legal document is uploaded');
+  }
 }
 
 /* ---- Date pill text, e.g. "MONDAY, SEPT 7TH" ---- */
@@ -1064,9 +1202,13 @@ function renderFamily(){
     const el = document.getElementById(id);
     if(!el) return;
     el.classList.toggle('locked', !unlocked);
+    markPillLock(el, unlocked, label);
   });
   const notifPill = document.getElementById('navPillNotifications');
-  if(notifPill) notifPill.classList.toggle('locked', !unlocked);
+  if(notifPill){
+    notifPill.classList.toggle('locked', !unlocked);
+    markPillLock(notifPill, unlocked, 'Notifications');
+  }
   document.getElementById('legalUploadBox').classList.toggle('unlocked', unlocked);
   document.getElementById('legalHint').textContent = unlocked
     ? "You're all set — the rest of the app is unlocked. Add more documents any time."
@@ -1098,7 +1240,7 @@ function renderFamily(){
   const upcomingList = document.getElementById('upcomingList');
   const upcoming = sortedAll
     .filter(isScheduledToday)
-    .map(activity=>({activity, status:getStatus(activity, dateStr)}))
+    .map(activity=>({activity, status:peekStatus(activity, dateStr)}))
     .filter(({status})=> !['done','missed','help_resolved'].includes(status.status));
   if(upcoming.length===0){
     upcomingList.innerHTML = '<p class="empty-note">Nothing left in today\'s schedule.</p>';
@@ -1121,12 +1263,13 @@ function renderFamily(){
   } else {
     existingList.innerHTML = sortedAll.map(activity=>{
       const status = displayStatus(activity, dateStr);
+      const note = status.status==='not_today' ? ' · not today' : '';
       return `
         <div class="task-row ${status.status==='done'?'done':''}">
           ${statusIcon(status.status)}
           <div class="t-body">
             <div class="t-text"><span class="t-time">${formatTime(activity.time)}</span> ${escapeHtml(activity.name)}</div>
-            <div class="t-caption">${daysLabel(activity.days)} · ${PRIORITY_CONFIG[activity.priority].label}</div>
+            <div class="t-caption">${daysLabel(activity.days)} · ${PRIORITY_CONFIG[activity.priority].label}${note}</div>
           </div>
         </div>`;
     }).join('');
@@ -1224,11 +1367,14 @@ function renderAlarmOverlay(){
       delete gifEl.dataset.src;
       gifEl.style.display='none';
     }
-    const cfg = PRIORITY_CONFIG[activity.priority];
     const snoozeWrap = document.getElementById('alarmSnoozeBtnWrap');
-    snoozeWrap.innerHTML = canDelay(activity, status)
-      ? `<button class="action-pill snooze" onclick="handleAlarmSnooze()">Snooze</button>`
-      : '';
+    const wantSnooze = canDelay(activity, status) ? 'yes' : 'no';
+    if(snoozeWrap.dataset.shown !== wantSnooze){
+      snoozeWrap.dataset.shown = wantSnooze;
+      snoozeWrap.innerHTML = wantSnooze==='yes'
+        ? `<button class="action-pill snooze" onclick="handleAlarmSnooze()">Snooze</button>`
+        : '';
+    }
     alarmMode.classList.remove('hidden');
     confirmMode.classList.add('hidden');
     if(!overlayVisible){ overlay.classList.remove('hidden'); overlayVisible=true; }
@@ -1239,7 +1385,8 @@ function renderAlarmOverlay(){
 
   stopAlarmSound();
 
-  if(lastCompletedActivity && (Date.now()-lastCompletedAt) < CONFIRM_DISPLAY_MS){
+  const sinceCompleted = Date.now() - lastCompletedAt;
+  if(lastCompletedActivity && sinceCompleted >= 0 && sinceCompleted < CONFIRM_DISPLAY_MS){
     document.getElementById('confirmTitle').textContent = lastCompletedActivity.name;
     confirmMode.classList.remove('hidden');
     alarmMode.classList.add('hidden');
@@ -1296,7 +1443,15 @@ function findActivity(id){ return state.activities.find(a=>a.id===id); }
 
 function buildDayPicker(){
   const wrap = document.getElementById('dayPicker');
-  wrap.innerHTML = DAY_LABELS.map((lbl,i)=>`<div class="day-chip ${selectedDays.includes(i)?'on':''}" data-day="${i}" onclick="toggleDay(${i})">${lbl}</div>`).join('');
+  // Real buttons, so they can be reached by keyboard and switch access, and
+  // aria-pressed so the choice is not carried by colour alone. The visible
+  // letter stays a single character, but the accessible name is the full day
+  // ("S" and "T" are each used twice).
+  wrap.innerHTML = DAY_LABELS.map((lbl,i)=>{
+    const on = selectedDays.includes(i);
+    return `<button type="button" class="day-chip ${on?'on':''}" data-day="${i}"`
+      + ` aria-pressed="${on}" aria-label="${DAY_NAMES[i]}" onclick="toggleDay(${i})">${lbl}</button>`;
+  }).join('');
 }
 function toggleDay(i){
   if(selectedDays.includes(i)) selectedDays = selectedDays.filter(d=>d!==i);
@@ -1386,9 +1541,12 @@ function submitForm(){
   nameError.classList.add('hidden');
   const time = document.getElementById('fTime').value || '09:00';
   const priority = document.getElementById('fPriority').value;
-  const graceMinutes = Math.max(1, parseInt(document.getElementById('fGrace').value,10) || PRIORITY_CONFIG[priority].grace);
+  const GRACE_MIN = 1, GRACE_MAX = 180;   // the same bounds the input advertises
+  const graceEntered = parseInt(document.getElementById('fGrace').value,10);
+  const graceMinutes = Math.min(GRACE_MAX, Math.max(GRACE_MIN,
+    Number.isFinite(graceEntered) ? graceEntered : PRIORITY_CONFIG[priority].grace));
   const gifUrl = document.getElementById('fGifUrl').value.trim();
-  const days = [...selectedDays];
+  const days = [...selectedDays].sort((a,b)=>a-b);
 
   if(editingId){
     const a = findActivity(editingId);

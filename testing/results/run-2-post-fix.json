@@ -1,0 +1,649 @@
+{
+  "run": "Verification run after the fixes were applied",
+  "recordedAt": "2026-09-10T12:52:41.512Z",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0",
+  "storageBackend": "localStorage",
+  "total": 84,
+  "passed": 84,
+  "failed": 0,
+  "bySuite": {
+    "ENGINE": {
+      "pass": 16,
+      "fail": 0
+    },
+    "TESTMODE": {
+      "pass": 6,
+      "fail": 0
+    },
+    "FORM": {
+      "pass": 10,
+      "fail": 0
+    },
+    "LOCK": {
+      "pass": 5,
+      "fail": 0
+    },
+    "PERSIST": {
+      "pass": 3,
+      "fail": 0
+    },
+    "FORMAT": {
+      "pass": 5,
+      "fail": 0
+    },
+    "NOTIF": {
+      "pass": 4,
+      "fail": 0
+    },
+    "RENDER": {
+      "pass": 8,
+      "fail": 0
+    },
+    "ELDER": {
+      "pass": 9,
+      "fail": 0
+    },
+    "ALARM": {
+      "pass": 5,
+      "fail": 0
+    },
+    "A11Y": {
+      "pass": 7,
+      "fail": 0
+    },
+    "HOUSE": {
+      "pass": 6,
+      "fail": 0
+    }
+  },
+  "tests": [
+    {
+      "id": "ENG-01",
+      "suite": "ENGINE",
+      "title": "A task stays pending before its scheduled time",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-02",
+      "suite": "ENGINE",
+      "title": "A task starts alarming exactly at its scheduled time",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-03",
+      "suite": "ENGINE",
+      "title": "An unanswered alarm is flagged missed once its grace window passes",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-04",
+      "suite": "ENGINE",
+      "title": "Being flagged missed raises exactly one family notification",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-05",
+      "suite": "ENGINE",
+      "title": "A completed task never alarms again that day",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-06",
+      "suite": "ENGINE",
+      "title": "A task not scheduled for today never alarms",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-07",
+      "suite": "ENGINE",
+      "title": "A snooze re-alarms after the priority snooze interval, not before",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-08",
+      "suite": "ENGINE",
+      "title": "Critical tasks cannot be snoozed",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-09",
+      "suite": "ENGINE",
+      "title": "Important tasks allow exactly one snooze",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-10",
+      "suite": "ENGINE",
+      "title": "Flexible tasks allow exactly three snoozes",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-11",
+      "suite": "ENGINE",
+      "title": "Asking for help resolves the task and notifies the family",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-12",
+      "suite": "ENGINE",
+      "title": "A per-task grace override wins over the priority default",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-16",
+      "suite": "ENGINE",
+      "title": "A critical task tells the family at the grace point but keeps sounding",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-13",
+      "suite": "ENGINE",
+      "title": "The earliest triggered alarm is the one presented",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-14",
+      "suite": "ENGINE",
+      "title": "Next-up skips resolved tasks and returns the soonest remaining one",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ENG-15",
+      "suite": "ENGINE",
+      "title": "A task whose time passed while the app was closed does not silently vanish",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "TST-01",
+      "suite": "TESTMODE",
+      "title": "Test now schedules a rehearsal without touching the real status",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "TST-02",
+      "suite": "TESTMODE",
+      "title": "A rehearsal alarm rings about three seconds later",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "TST-03",
+      "suite": "TESTMODE",
+      "title": "Finishing a rehearsal clears it and leaves the real task pending",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "TST-04",
+      "suite": "TESTMODE",
+      "title": "Snoozing a rehearsal keeps it quiet for the snooze interval",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "TST-05",
+      "suite": "TESTMODE",
+      "title": "An ignored rehearsal expires quietly without alerting the family",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "TST-06",
+      "suite": "TESTMODE",
+      "title": "Asking for help during a rehearsal does not alarm the family",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-01",
+      "suite": "FORM",
+      "title": "A named activity is saved with all of its settings",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-02",
+      "suite": "FORM",
+      "title": "An unnamed activity is refused and the error is shown",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-03",
+      "suite": "FORM",
+      "title": "Editing an activity updates it in place instead of duplicating it",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-04",
+      "suite": "FORM",
+      "title": "A grace window of zero or less is rejected",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-05",
+      "suite": "FORM",
+      "title": "A grace window beyond the allowed maximum is rejected",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-06",
+      "suite": "FORM",
+      "title": "Choosing a priority loads its recommended grace window",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-07",
+      "suite": "FORM",
+      "title": "At least one weekday always stays selected",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-08",
+      "suite": "FORM",
+      "title": "Repeat days are stored in a stable, sorted order",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-09",
+      "suite": "FORM",
+      "title": "A name containing markup is rendered as text, never as HTML",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FRM-10",
+      "suite": "FORM",
+      "title": "Cancelling the form discards the entry",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "LCK-01",
+      "suite": "LOCK",
+      "title": "With no document uploaded the four protected screens stay shut",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "LCK-02",
+      "suite": "LOCK",
+      "title": "The legal screen itself stays reachable while locked",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "LCK-03",
+      "suite": "LOCK",
+      "title": "Uploading a document opens up the rest of the app",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "LCK-04",
+      "suite": "LOCK",
+      "title": "Removing the last document locks up again and closes the open screen",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "LCK-05",
+      "suite": "LOCK",
+      "title": "Locked navigation buttons are marked as unavailable to assistive tech",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "PER-01",
+      "suite": "PERSIST",
+      "title": "The app has a working storage backend",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "PER-02",
+      "suite": "PERSIST",
+      "title": "Saving the schedule does not raise an error",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "PER-03",
+      "suite": "PERSIST",
+      "title": "A saved schedule can be read back",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FMT-01",
+      "suite": "FORMAT",
+      "title": "Midnight and noon are labelled correctly",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FMT-02",
+      "suite": "FORMAT",
+      "title": "A task on all seven days reads as \"Every day\"",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FMT-03",
+      "suite": "FORMAT",
+      "title": "File sizes are shown in sensible units",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FMT-04",
+      "suite": "FORMAT",
+      "title": "Ordinal dates are spelled correctly, including the teens",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "FMT-05",
+      "suite": "FORMAT",
+      "title": "Every HTML-significant character is escaped",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "NTF-01",
+      "suite": "NOTIF",
+      "title": "The badge counts only unread items from today",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "NTF-02",
+      "suite": "NOTIF",
+      "title": "With nothing unread the badge is hidden",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "NTF-03",
+      "suite": "NOTIF",
+      "title": "\"Mark all as read\" clears today without rewriting history",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "NTF-04",
+      "suite": "NOTIF",
+      "title": "Help requests and misses are worded differently",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-01",
+      "suite": "RENDER",
+      "title": "Upcoming lists only unresolved tasks for today",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-02",
+      "suite": "RENDER",
+      "title": "Upcoming shows a friendly note when the day is clear",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-03",
+      "suite": "RENDER",
+      "title": "Existing lists every task with its days and priority",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-04",
+      "suite": "RENDER",
+      "title": "Existing does not show an off-day task as if it were still to come",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-05",
+      "suite": "RENDER",
+      "title": "The task list is ordered by time of day",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-06",
+      "suite": "RENDER",
+      "title": "A missed task is shown with the alert icon, not the done icon",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-07",
+      "suite": "RENDER",
+      "title": "The date pill shows today on every screen",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "RND-08",
+      "suite": "RENDER",
+      "title": "Rendering a screen does not quietly rewrite stored history",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-01",
+      "suite": "ELDER",
+      "title": "The screen stays calm and empty when nothing is due",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-02",
+      "suite": "ELDER",
+      "title": "A due task takes over the screen with its name",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-03",
+      "suite": "ELDER",
+      "title": "A critical alarm offers no snooze button",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-04",
+      "suite": "ELDER",
+      "title": "A flexible alarm offers a snooze button",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-05",
+      "suite": "ELDER",
+      "title": "Finishing from the alarm marks the task done and confirms it",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-06",
+      "suite": "ELDER",
+      "title": "The confirmation clears itself and returns to the calm screen",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-07",
+      "suite": "ELDER",
+      "title": "The alarm never appears on the family device",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-08",
+      "suite": "ELDER",
+      "title": "The alarm shows the picture chosen for the task",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ELD-09",
+      "suite": "ELDER",
+      "title": "A task with no picture leaves no broken image behind",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ALM-01",
+      "suite": "ALARM",
+      "title": "A critical alarm keeps sounding until it is confirmed, as promised",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ALM-02",
+      "suite": "ALARM",
+      "title": "The snooze button survives long enough to be pressed",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ALM-03",
+      "suite": "ALARM",
+      "title": "A task whose time passed hours ago is not rung as if it were due now",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ALM-04",
+      "suite": "ALARM",
+      "title": "The family is told about a miss on the day it happened, not hours later",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ALM-05",
+      "suite": "ALARM",
+      "title": "The confirmation tick is not shown when nothing was just finished",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-01",
+      "suite": "A11Y",
+      "title": "The page can be pinch-zoomed",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-02",
+      "suite": "A11Y",
+      "title": "The repeat-day picker can be operated from a keyboard",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-03",
+      "suite": "A11Y",
+      "title": "The repeat-day picker reports its on/off state",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-04",
+      "suite": "A11Y",
+      "title": "Each weekday chip has a distinguishable label",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-05",
+      "suite": "A11Y",
+      "title": "Modal dialogs announce themselves as dialogs",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-06",
+      "suite": "A11Y",
+      "title": "Toast messages are announced to screen readers",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "ACC-07",
+      "suite": "A11Y",
+      "title": "The alarm screen is announced when it takes over",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "HSE-01",
+      "suite": "HOUSE",
+      "title": "Old day records are not kept for ever",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "HSE-06",
+      "suite": "HOUSE",
+      "title": "Pruning keeps recent days and only drops genuinely old ones",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "HSE-02",
+      "suite": "HOUSE",
+      "title": "The notification history is capped",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "HSE-03",
+      "suite": "HOUSE",
+      "title": "Deleting a task also clears its pending rehearsal",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "HSE-04",
+      "suite": "HOUSE",
+      "title": "Cancelling a delete keeps the task",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "HSE-05",
+      "suite": "HOUSE",
+      "title": "A rehearsal for a deleted task cannot ring",
+      "status": "pass",
+      "detail": ""
+    }
+  ]
+}
