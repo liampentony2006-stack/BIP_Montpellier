@@ -232,7 +232,7 @@
     text-transform:uppercase;letter-spacing:.5px;
   }
   .activity-card .activity-gif{
-    max-width:80%;max-height:140px;object-fit:contain;border-radius:16px;margin-top:16px;display:none;
+    max-width:92%;max-height:260px;object-fit:contain;border-radius:16px;margin-top:16px;display:none;
   }
 
   .alarm-actions{display:flex;flex-direction:column;justify-content:center;gap:16px;min-width:200px;}
@@ -525,7 +525,7 @@
         <button type="button" class="btn small" onclick="document.getElementById('fGifFile').click()">Upload a GIF from your device</button>
         <span class="priority-help" style="margin:0;">or pick one from your Downloads folder</span>
       </div>
-      <img id="gifPreview" src="" alt="" style="display:none;width:64px;height:64px;object-fit:cover;border-radius:10px;margin-top:6px;" onload="handleGifPreviewLoad()" onerror="handleGifPreviewError()">
+      <img id="gifPreview" src="" alt="" style="display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:6px;" onload="handleGifPreviewLoad()" onerror="handleGifPreviewError()">
       <div id="fGifError" class="form-error hidden">Couldn't load that link as an image. Double-check it points straight to the file (and doesn't need a login or block outside sites from loading it).</div>
     </div>
     <div class="form-actions">
