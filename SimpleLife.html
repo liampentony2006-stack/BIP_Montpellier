@@ -924,10 +924,16 @@ function startVoiceReminders(activity, status){
   }, CHIME_INTERVAL_MS * CHIMES_BEFORE_VOICE);
 }
 function stopVoiceReminders(){
-  if('speechSynthesis' in window){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  // Only cancel speech if we actually had a reminder loop running/scheduled.
+  // Calling speechSynthesis.cancel() unconditionally here would also cut off
+  // unrelated one-off utterances (like the "All done!" confirmation), since
+  // this runs on every alarm-overlay re-render (every second) even when
+  // there's nothing left for it to stop.
+  const hadReminder = !!(voiceIntervalId || voiceStartTimeoutId || lastAnnouncedKey);
   if(voiceIntervalId){ clearInterval(voiceIntervalId); voiceIntervalId=null; }
   if(voiceStartTimeoutId){ clearTimeout(voiceStartTimeoutId); voiceStartTimeoutId=null; }
   lastAnnouncedKey = null;
+  if(hadReminder && 'speechSynthesis' in window){ try{ window.speechSynthesis.cancel(); }catch(e){} }
 }
 document.addEventListener('click', ()=>{
   ensureAudio();
