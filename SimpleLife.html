@@ -6,7 +6,7 @@
 <title>SimpleLife — Care Schedule</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+Pro:wght@400;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#1E2A26;
@@ -28,8 +28,9 @@
     --brand-green-end:#03A767;
     --radius:14px;
     --shadow: 0 1px 0 rgba(30,42,38,0.06);
-    --font-display: 'Baloo 2', 'Inter', system-ui, sans-serif;
-    --font-body: 'Inter', system-ui, sans-serif;
+    --font-logo: 'Montserrat', system-ui, sans-serif;
+    --font-display: 'Source Sans Pro', system-ui, sans-serif;
+    --font-body: 'Source Sans Pro', system-ui, sans-serif;
     --font-elder: 'Atkinson Hyperlegible', system-ui, sans-serif;
   }
   *{box-sizing:border-box;}
@@ -186,15 +187,15 @@
   .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
 
   /* ================= BRAND LOGO ================= */
-  .brand-logo{display:inline-flex;align-items:center;font-family:var(--font-display);font-weight:800;line-height:1;white-space:nowrap;}
+  .brand-logo{display:inline-flex;align-items:center;font-family:var(--font-logo);font-weight:800;line-height:1;white-space:nowrap;}
   .brand-logo .word-simple{color:var(--brand-navy);}
   .brand-logo .word-life{
     background:linear-gradient(120deg,var(--brand-green-start),var(--brand-green-end));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  .brand-logo .check-badge{width:0.42em;height:0.42em;margin-left:0.15em;flex-shrink:0;}
-  .brand-logo.lg{font-size:clamp(34px,7vw,56px);}
-  .brand-logo.sm{font-size:19px;}
+  .brand-logo .check-badge{width:0.85em;height:0.85em;margin-left:0.15em;flex-shrink:0;}
+  .brand-logo.lg{font-size:clamp(48px,9.5vw,80px);}
+  .brand-logo.sm{font-size:28px;}
 
   /* ================= ELDERLY VIEW ================= */
   .elder-wrap{
